@@ -1,0 +1,16 @@
+{
+  "video_id": "vS2dJDRYctc",
+  "sport": "cricket",
+  "date": "2022-09-07T18:48:47.000Z",
+  "team": "UNKNOWN",
+  "opponent": "UNKNOWN",
+  "result": "UNKNOWN",
+  "speaker": "UNKNOWN",
+  "source": "https://www.youtube.com/watch?v=vS2dJDRYctc",
+  "title": "Team PAKISTAN  hold a press conference after the PAKISTAN vs AFGHANISTANcricket match in AsiaCup2022",
+  "channel": "Amashi Digital",
+  "quote_text": "Team PAKISTAN hold a press conference after the #PAKISTAN vs AFGHANISTAN cricket match in #AsiaCup2022, in Sharjah.",
+  "scraped_at": "2026-08-28T10:57:44.510531+00:00",
+  "metadata_status": "needs_enrichment",
+  "source_type": "apify_youtube"
+}

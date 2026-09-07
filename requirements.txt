@@ -1,0 +1,17 @@
+requests
+beautifulsoup4
+youtube-transcript-api==1.2.4
+vaderSentiment
+pandas
+numpy
+statsmodels
+matplotlib
+streamlit
+deep-translator
+PyJWT
+# Optional but recommended: transformer-based sentiment (much more accurate
+# than VADER on context, e.g. "penalty decision was wrong" praising the team
+# despite negative-sounding words). ~500MB+ download on first run.
+# If you skip these two, analyzer.py automatically falls back to VADER.
+transformers
+torch

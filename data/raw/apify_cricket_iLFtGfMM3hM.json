@@ -1,0 +1,16 @@
+{
+  "video_id": "iLFtGfMM3hM",
+  "sport": "cricket",
+  "date": "2015-02-02T17:01:01.000Z",
+  "team": "UNKNOWN",
+  "opponent": "UNKNOWN",
+  "result": "UNKNOWN",
+  "speaker": "UNKNOWN",
+  "source": "https://www.youtube.com/watch?v=iLFtGfMM3hM",
+  "title": "Virat Kohli Post  Match Presentation",
+  "channel": "sports arenas",
+  "quote_text": "India-Australia Border-Gavaskar 2014-2015 series  in Australia post series presentation virat kohli speech",
+  "scraped_at": "2026-08-28T10:57:44.514643+00:00",
+  "metadata_status": "needs_enrichment",
+  "source_type": "apify_youtube"
+}

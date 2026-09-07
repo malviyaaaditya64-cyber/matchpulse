@@ -1,0 +1,16 @@
+{
+  "video_id": "br6qlF37y-M",
+  "sport": "cricket",
+  "date": "2021-12-20T15:15:15.000Z",
+  "team": "UNKNOWN",
+  "opponent": "UNKNOWN",
+  "result": "UNKNOWN",
+  "speaker": "UNKNOWN",
+  "source": "https://www.youtube.com/watch?v=br6qlF37y-M",
+  "title": "Steve Smith post match press conference | AUS vs ENG - Second Ashes Test, Adelaide",
+  "channel": "Cric-Mate",
+  "quote_text": "For more cricket updates from us:\n\nFACEBOOK - Extra Pace :   / extrapaces  \n\nWEBSITE: https://cric-mate.com\n\nMEDIA SUPPORT: https://Witbuz.com",
+  "scraped_at": "2026-08-28T10:57:44.518421+00:00",
+  "metadata_status": "needs_enrichment",
+  "source_type": "apify_youtube"
+}

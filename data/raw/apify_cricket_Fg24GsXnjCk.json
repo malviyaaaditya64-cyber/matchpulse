@@ -1,0 +1,16 @@
+{
+  "video_id": "Fg24GsXnjCk",
+  "sport": "cricket",
+  "date": "2022-09-06T19:24:44.000Z",
+  "team": "UNKNOWN",
+  "opponent": "UNKNOWN",
+  "result": "UNKNOWN",
+  "speaker": "UNKNOWN",
+  "source": "https://www.youtube.com/watch?v=Fg24GsXnjCk",
+  "title": "Team INDIA hold a press conference after the INDIAvsSRI LANKA cricket match in AsiaCup2022, in Dubai",
+  "channel": "Amashi Digital",
+  "quote_text": "Team INDIA hold a press conference after the #INDIAvsSRI LANKA cricket match in #AsiaCup2022, in Dubai.",
+  "scraped_at": "2026-08-28T10:57:44.499945+00:00",
+  "metadata_status": "needs_enrichment",
+  "source_type": "apify_youtube"
+}
