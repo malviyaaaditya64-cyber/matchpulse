@@ -73,14 +73,10 @@ def granger_test(df: pd.DataFrame, max_lag: int = 3) -> dict:
     if len(data) < max_lag * 2 + 2:
         return {"error": f"Not enough data points ({len(data)}). Need at least {max_lag * 2 + 2} matches."}
 
-        try:
-            try:
-                results = grangercausalitytests(data.values, maxlag=max_lag, verbose=False)
-            except TypeError:
-            # Newer statsmodels versions removed the `verbose` argument entirely.
-                results = grangercausalitytests(data.values, maxlag=max_lag)
-        except Exception as e:
-         return {"error": str(e)}
+    try:
+        results = grangercausalitytests(data.values, maxlag=max_lag)
+    except Exception as e:
+        return {"error": str(e)}
 
     summary = {}
     for lag, res in results.items():
