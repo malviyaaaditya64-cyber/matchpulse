@@ -1,4 +1,3 @@
-
 """
 SQLite storage for scraped quotes + NLP scores.
 Run this file directly to (re)create the schema and load all raw JSON
@@ -13,9 +12,12 @@ import sys
 
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
 from nlp.analyzer import analyze_quote  # noqa: E402
+from storage.data_quality import validate_match_fields  # noqa: E402
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "..", "data", "tracker.db")
 RAW_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "raw")
+QUARANTINE_DIR = os.path.join(RAW_DIR, "quarantine")
+QUARANTINE_LOG = os.path.join(QUARANTINE_DIR, "quarantine_log.jsonl")
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS matches (
@@ -145,6 +147,25 @@ def get_user_by_username(conn, username):
     return dict(row) if row else None
 
 
+def _quarantine(path, entry, reasons):
+    """
+    Record a malformed raw file without touching it on disk. Appends one
+    line to data/raw/quarantine/quarantine_log.jsonl so bad entries can be
+    reviewed / manually fixed later.
+    """
+    os.makedirs(QUARANTINE_DIR, exist_ok=True)
+    record = {
+        "file": os.path.basename(path),
+        "reasons": reasons,
+        "team": entry.get("team", ""),
+        "opponent": entry.get("opponent", ""),
+        "video_id": entry.get("video_id"),
+        "match_id": entry.get("match_id"),
+    }
+    with open(QUARANTINE_LOG, "a", encoding="utf-8") as f:
+        f.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+
 def load_all_raw_files():
     """
     Read every JSON file scraped into data/raw/, run NLP, and store results.
@@ -176,6 +197,7 @@ def load_all_raw_files():
 
     loaded = 0
     skipped = 0
+    quarantined = 0
 
     for path in files:
         try:
@@ -200,6 +222,21 @@ def load_all_raw_files():
                 continue
 
             sport = entry.get("sport", "football")
+
+            # Sanity check: some scraped files have the full video title
+            # sitting in the team/opponent field instead of an actual team
+            # name (a scraper/parsing bug). Keep those out of the database
+            # instead of polluting team lists and charts. The raw file is
+            # left untouched on disk -- only a record is appended to the
+            # quarantine log for later review.
+            is_valid, reasons = validate_match_fields(
+                entry.get("team", ""), entry.get("opponent", ""), sport
+            )
+            if not is_valid:
+                print(f"QUARANTINED {path}: {'; '.join(reasons)}")
+                _quarantine(path, entry, reasons)
+                quarantined += 1
+                continue
 
             insert_match(
                 conn,
@@ -245,11 +282,13 @@ def load_all_raw_files():
     print()
     print("========================================")
     print(f"Successfully loaded: {loaded}")
-    print(f"Skipped: {skipped}")
+    print(f"Skipped (missing data): {skipped}")
+    print(f"Quarantined (malformed team/opponent): {quarantined}")
+    if quarantined:
+        print(f"  -> see {QUARANTINE_LOG}")
     print("========================================")
 
 
 if __name__ == "__main__":
     init_schema()
     load_all_raw_files()
-
