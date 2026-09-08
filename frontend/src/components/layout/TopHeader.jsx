@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Bell, Sun } from "lucide-react";
 import SportSelector from "../SportSelector";
 import { api } from "../../api";
@@ -7,6 +7,12 @@ const TopHeader = ({ sports, selectedSport, onSportSelect, teams, selectedTeam, 
   const username = api.getStoredUsername() || "Analyst";
   const initials = username.substring(0, 2).toUpperCase();
   const currentYear = new Date().getFullYear();
+  const [tooltip, setTooltip] = useState(null);
+
+  const showComingSoon = (label) => {
+    setTooltip(label);
+    setTimeout(() => setTooltip((t) => (t === label ? null : t)), 1800);
+  };
 
   return (
     <header className="top-header">
@@ -57,13 +63,29 @@ const TopHeader = ({ sports, selectedSport, onSportSelect, teams, selectedTeam, 
           </select>
         </div>
 
-        <button className="icon-btn" title="Toggle theme" type="button">
-          <Sun size={16} />
-        </button>
+        <div style={{ position: "relative" }}>
+          <button
+            className="icon-btn"
+            title="Toggle theme"
+            type="button"
+            onClick={() => showComingSoon("theme")}
+          >
+            <Sun size={16} />
+          </button>
+          {tooltip === "theme" && <span className="header-tooltip">Dark mode — coming soon</span>}
+        </div>
 
-        <button className="icon-btn" title="Notifications" type="button">
-          <Bell size={16} />
-        </button>
+        <div style={{ position: "relative" }}>
+          <button
+            className="icon-btn"
+            title="Notifications"
+            type="button"
+            onClick={() => showComingSoon("bell")}
+          >
+            <Bell size={16} />
+          </button>
+          {tooltip === "bell" && <span className="header-tooltip">Notifications — coming soon</span>}
+        </div>
 
         <div className="mp-user">
           <div className="mp-user-avatar">{initials}</div>

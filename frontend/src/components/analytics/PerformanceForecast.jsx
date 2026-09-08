@@ -79,7 +79,15 @@ const PerformanceForecast = ({ season }) => {
     <div className="perf-trend-card">
       <div className="perf-trend-header">
         <span className="perf-trend-title">Performance Trend</span>
-        <button type="button" className="perf-trend-view-btn">View Details</button>
+        <button
+          type="button"
+          className="perf-trend-view-btn"
+          onClick={() =>
+            document.getElementById("section-sentiment-trend")?.scrollIntoView({ behavior: "smooth", block: "start" })
+          }
+        >
+          View Details
+        </button>
       </div>
 
       <div className="perf-trend-outlook">
