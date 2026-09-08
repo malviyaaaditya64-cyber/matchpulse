@@ -1,48 +1,38 @@
 import React from "react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 const SentimentTrend = ({ season }) => {
-  if (!season || season.length === 0) {
-    return (
-      <div style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-card)", borderRadius: 14, padding: 24, marginBottom: 24 }}>
-        <div style={{ fontFamily: "var(--font-display)", fontSize: 17, fontWeight: 600, marginBottom: 3, color: "var(--text-primary)" }}>
-          Sentiment Trend Timeline
-        </div>
-        <div style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-muted)" }}>
-          Not enough match data to display trend.
-        </div>
-      </div>
-    );
-  }
-
-  const data = season.map((match) => ({
+  const data = season?.map((match) => ({
     date: match.date,
-    sentiment: match.sentiment,
-    confidence: match.confidence,
-    blame: match.blame,
-  }));
+    Sentiment: match.sentiment,
+    Confidence: match.confidence,
+    Blame: match.blame,
+  })) || [];
 
   return (
-    <div style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-card)", borderRadius: 14, padding: 24, marginBottom: 24 }}>
-      <div style={{ fontFamily: "var(--font-display)", fontSize: 17, fontWeight: 600, marginBottom: 3, color: "var(--text-primary)" }}>
-        Sentiment Trend Timeline
-      </div>
-      <div style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-muted)", marginBottom: 16 }}>
-        Match-by-match sentiment, confidence, and blame trends
-      </div>
-      <div style={{ height: 300 }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="date" />
-            <YAxis />
-            <Tooltip />
-            <Line type="monotone" dataKey="sentiment" stroke="var(--teal)" name="Sentiment" />
-            <Line type="monotone" dataKey="confidence" stroke="var(--amber)" name="Confidence" />
-            <Line type="monotone" dataKey="blame" stroke="var(--coral)" name="Blame" />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+    <div className="intel-card">
+      <div className="intel-card-title">Sentiment Trend Timeline</div>
+      <div className="intel-card-subtitle">Match-by-match sentiment, confidence, and blame trends</div>
+      {(!season || season.length === 0) ? (
+        <div className="intel-empty">Not enough match data to display trend.</div>
+      ) : (
+        <div style={{ height: 260 }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={data} margin={{ top: 5, right: 20, left: -15, bottom: 0 }}>
+              <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="date" tick={{ fill: "var(--text-muted)", fontSize: 10, fontFamily: "var(--font-mono)" }} axisLine={{ stroke: "var(--border)" }} tickLine={false} />
+              <YAxis domain={[-1, 1]} tick={{ fill: "var(--text-muted)", fontSize: 10, fontFamily: "var(--font-mono)" }} axisLine={false} tickLine={false} />
+              <Tooltip
+                contentStyle={{ background: "var(--surface-raised)", border: "1px solid var(--border)", borderRadius: 8, fontFamily: "var(--font-mono)", fontSize: 12 }}
+              />
+              <Legend wrapperStyle={{ fontFamily: "var(--font-body)", fontSize: 11 }} />
+              <Line type="monotone" dataKey="Sentiment" stroke="var(--teal)" strokeWidth={2} dot={false} isAnimationActive={false} />
+              <Line type="monotone" dataKey="Confidence" stroke="var(--accent)" strokeWidth={2} dot={false} isAnimationActive={false} />
+              <Line type="monotone" dataKey="Blame" stroke="var(--coral)" strokeWidth={2} dot={false} isAnimationActive={false} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </div>
   );
 };

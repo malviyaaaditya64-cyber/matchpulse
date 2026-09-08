@@ -1,11 +1,9 @@
 ﻿import React, { useEffect, useState } from "react";
 import { api } from "./api";
-import SentimentPulse from "./components/SentimentPulse";
 import SignalBars from "./components/SignalBars";
 import PerformanceForecast from "./components/analytics/PerformanceForecast";
 import AnomalyDetection from "./components/analytics/AnomalyDetection";
 import MatchInsights from "./components/analytics/MatchInsights";
-import HistoricalComparison from "./components/analytics/HistoricalComparison";
 import EarlyWarningSignals from "./components/analytics/EarlyWarningSignals";
 import TeamPerformanceRadar from "./components/intelligence/TeamPerformanceRadar";
 import MatchPressure from "./components/intelligence/MatchPressure";
@@ -15,17 +13,13 @@ import ExecutiveInsights from "./components/intelligence/ExecutiveInsights";
 import SentimentTrend from "./components/intelligence/SentimentTrend";
 import NarrativeShift from "./components/intelligence/NarrativeShift";
 import NarrativeAlerts from "./components/intelligence/NarrativeAlerts";
-import StatCard from "./components/StatCard";
 import CorrelationPanel from "./components/CorrelationPanel";
-import SportSelector from "./components/SportSelector";
 import MatchTranscripts from "./components/MatchTranscripts";
 import Login from "./components/Login";
 import KPIGrid from "./components/dashboard/KPIGrid";
 
 import TeamBanner from "./components/layout/TeamBanner";
-
 import TopHeader from "./components/layout/TopHeader";
-
 import Sidebar from "./components/layout/Sidebar";
 
 
@@ -40,6 +34,7 @@ export default function App() {
   const [error, setError] = useState(null);
   const [tab, setTab] = useState("overview");
   const [activeNavItem, setActiveNavItem] = useState("overview");
+  const [placeholderLabel, setPlaceholderLabel] = useState("");
 
   useEffect(() => {
     if (!loggedIn) return;
@@ -92,14 +87,57 @@ export default function App() {
       ).toFixed(2)
     : "—";
 
+  const SCROLL_TARGETS = {
+    "sentiment-trend": "section-sentiment-trend",
+    "narrative-shift": "section-narrative-shift",
+    "anomaly-detection": "section-anomaly-detection",
+    "early-warnings": "section-early-warnings",
+    "team-intelligence": "section-team-intelligence",
+    "executive-insights": "section-executive-insights",
+    correlation: "section-correlation",
+    "lag-analysis": "section-correlation",
+    "granger-causality": "section-correlation",
+  };
+
+  const PLACEHOLDER_LABELS = {
+    reports: "Reports",
+    "data-explorer": "Data Explorer",
+    methodology: "Methodology",
+  };
+
   const handleNavItemClick = (item) => {
     setActiveNavItem(item);
 
     if (item === "overview") {
       setTab("overview");
-    } else if (item === "press") {
-      setTab("press");
+      return;
     }
+    if (item === "press") {
+      setTab("press");
+      return;
+    }
+    if (PLACEHOLDER_LABELS[item]) {
+      setTab("placeholder");
+      setPlaceholderLabel(PLACEHOLDER_LABELS[item]);
+      return;
+    }
+    const targetId = SCROLL_TARGETS[item];
+    if (targetId) {
+      setTab("overview");
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          document.getElementById(targetId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 60);
+      });
+    }
+  };
+
+  const handleChangeTeamClick = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    setTimeout(() => {
+      const el = document.getElementById("team-select");
+      el?.focus();
+    }, 300);
   };
 
   const handleLogout = () => {
@@ -126,6 +164,7 @@ export default function App() {
         activeNavItem={activeNavItem}
         onNavItemClick={handleNavItemClick}
         onLogout={handleLogout}
+        onChangeTeamClick={handleChangeTeamClick}
       />
 
       <main className="main-content">
@@ -158,21 +197,12 @@ export default function App() {
 
         {season && (
           <>
-            <TeamBanner
-              team={team}
-              sport={sport}
-              wins={wins}
-              draws={draws}
-              losses={losses}
-              matchCount={season.length}
-            />
-
             <div
               style={{
                 display: "flex",
                 gap: 4,
                 borderBottom: "1px solid var(--border)",
-                marginBottom: 24,
+                marginBottom: 20,
               }}
             >
               {[
@@ -208,6 +238,20 @@ export default function App() {
 
             {tab === "overview" && (
               <>
+                {/* Row 1 — Team banner + Performance Trend */}
+                <div className="overview-top-row">
+                  <TeamBanner
+                    team={team}
+                    sport={sport}
+                    wins={wins}
+                    draws={draws}
+                    losses={losses}
+                    matchCount={season.length}
+                  />
+                  <PerformanceForecast season={season} />
+                </div>
+
+                {/* Row 2 — KPI cards */}
                 <KPIGrid
                   wins={wins}
                   draws={draws}
@@ -215,79 +259,71 @@ export default function App() {
                   avgSentiment={avgSentiment}
                 />
 
+                {/* Row 3 — Recent Anomalies / Key Match Insights / Early Warning / Radar */}
                 <div className="analytics-grid">
-                  <section className="analytics-card analytics-card-large">
-                    <div className="analytics-card-header">
-                      <h3 className="analytics-card-title">Sentiment Pulse</h3>
-                      <p className="analytics-card-subtitle">
-                        Press-conference tone across the season · bar strip below shows result (green win, amber draw, red loss)
-                      </p>
-                    </div>
-                    <SentimentPulse season={season} />
-                  </section>
-
-                  <section className="analytics-card analytics-card-medium">
-                    <PerformanceForecast season={season} />
-                  </section>
-
-                  <section className="analytics-card analytics-card-small">
-                    <AnomalyDetection season={season} />
-                  </section>
-
-                  <section className="analytics-card analytics-card-small">
-                    <MatchInsights season={season} />
-                  </section>
-
-                  <section className="analytics-card analytics-card-large">
-                    <HistoricalComparison season={season} />
-                  </section>
-
-                  <section className="analytics-card analytics-card-small">
-                    <EarlyWarningSignals season={season} />
-                  </section>
-
-                  <div className="analytics-card analytics-card-large">
-                    <div className="analytics-card-header">
-                      <h3 className="analytics-card-title">Team Signals</h3>
-                      <p className="analytics-card-subtitle">
-                        Blame-shifting and confidence metrics across the season
-                      </p>
-                    </div>
-                    <div className="team-signals-grid" style={{ display: "flex", gap: 24 }}>
-                      <div className="team-signal-item" style={{ flex: 1 }}>
-                        <SignalBars
-                          season={season}
-                          dataKey="blame"
-                          color="var(--coral)"
-                          title="Blame-shifting"
-                          hint="Positive = blames referee/umpire/luck/injuries · negative = self-accountability"
-                        />
-                      </div>
-                      <div className="team-signal-item" style={{ flex: 1 }}>
-                        <SignalBars
-                          season={season}
-                          dataKey="confidence"
-                          color="var(--amber)"
-                          title="Confidence"
-                          hint="Positive = assertive language · negative = hedging language"
-                        />
-                      </div>
-                    </div>
-                  </div>
+                  <div className="col-3" id="section-anomaly-detection"><AnomalyDetection season={season} /></div>
+                  <div className="col-4"><MatchInsights season={season} /></div>
+                  <div className="col-2" id="section-early-warnings"><EarlyWarningSignals season={season} /></div>
+                  <div className="col-3"><TeamPerformanceRadar season={season} /></div>
                 </div>
 
+                {/* Row 4 — Match Pressure / Narrative Themes / Team Intelligence / Executive Insights */}
+                <div className="analytics-grid">
+                  <div className="col-3"><MatchPressure season={season} /></div>
+                  <div className="col-3"><NarrativeThemes season={season} /></div>
+                  <div className="col-3" id="section-team-intelligence"><TeamIntelligence season={season} /></div>
+                  <div className="col-3" id="section-executive-insights"><ExecutiveInsights season={season} /></div>
+                </div>
 
-                <TeamPerformanceRadar season={season} />
-                <MatchPressure season={season} />
-                <NarrativeThemes season={season} />
-                <TeamIntelligence season={season} />
-                <ExecutiveInsights season={season} />
-                <SentimentTrend season={season} />
-                <NarrativeShift season={season} />
-                <NarrativeAlerts season={season} />
+                {/* Row 5 — Sentiment Trend Timeline / Narrative Shift / Narrative Alerts */}
+                <div className="analytics-grid">
+                  <div className="col-5" id="section-sentiment-trend"><SentimentTrend season={season} /></div>
+                  <div className="col-4" id="section-narrative-shift"><NarrativeShift season={season} /></div>
+                  <div className="col-3"><NarrativeAlerts season={season} /></div>
+                </div>
 
-                {analysis && <CorrelationPanel analysis={analysis} />}
+                {/* Row 6 — Blame-shifting / Confidence / Correlation */}
+                <div className="analytics-grid">
+                  <div className="col-4">
+                    <SignalBars
+                      season={season}
+                      dataKey="blame"
+                      color="var(--coral)"
+                      title="Blame-shifting"
+                      hint="Positive = blames referee/umpire/luck/injuries · negative = self-accountability"
+                    />
+                  </div>
+                  <div className="col-4">
+                    <SignalBars
+                      season={season}
+                      dataKey="confidence"
+                      color="var(--accent)"
+                      title="Confidence"
+                      hint="Positive = assertive language · negative = hedging language"
+                    />
+                  </div>
+                  <div className="col-4" id="section-correlation">
+                    {analysis ? (
+                      <CorrelationPanel analysis={analysis} />
+                    ) : (
+                      <div className="intel-card">
+                        <div className="intel-card-title">Does negativity predict a losing streak?</div>
+                        <div className="intel-empty">Loading correlation analysis…</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </>
+            )}
+
+            {tab === "placeholder" && (
+              <div className="intel-card" style={{ maxWidth: 480, margin: "40px auto", textAlign: "center", padding: "32px 28px" }}>
+                <div className="intel-card-title" style={{ fontSize: 16, marginBottom: 8 }}>{placeholderLabel}</div>
+                <div className="intel-empty" style={{ fontSize: 13 }}>
+                  This section isn't built yet — it needs its own data view and hasn't been wired up.
+                  Let us know if you'd like this feature added.
+                </div>
+              </div>
             )}
 
             {tab === "press" && (

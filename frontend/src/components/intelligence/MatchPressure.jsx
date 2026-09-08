@@ -1,5 +1,17 @@
 import React from "react";
 
+const LEVEL_ANGLE = { Low: 150, Medium: 90, High: 30 };
+const LEVEL_COLOR = { Low: "var(--teal)", Medium: "var(--amber)", High: "var(--coral)" };
+
+function needlePoint(level) {
+  const angleDeg = LEVEL_ANGLE[level] ?? 90;
+  const rad = (angleDeg * Math.PI) / 180;
+  const cx = 80;
+  const cy = 80;
+  const r = 52;
+  return { x: cx + r * Math.cos(rad), y: cy - r * Math.sin(rad) };
+}
+
 const MatchPressure = ({ season }) => {
   const calculatePressure = () => {
     if (!season || !Array.isArray(season) || season.length === 0) return null;
@@ -27,45 +39,47 @@ const MatchPressure = ({ season }) => {
       pressureFactors = ["Stable sentiment", "Stable confidence", "Stable blame"];
     }
 
-    return {
-      pressureLevel,
-      pressureFactors,
-    };
+    return { pressureLevel, pressureFactors };
   };
 
   const pressure = calculatePressure();
 
-  if (!pressure) {
-    return (
-      <div style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-card)", borderRadius: 14, padding: 24, marginBottom: 24 }}>
-        <div style={{ fontFamily: "var(--font-display)", fontSize: 17, fontWeight: 600, marginBottom: 3, color: "var(--text-primary)" }}>
-          Match Pressure
-        </div>
-        <div style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-muted)" }}>
-          Not enough match data to calculate pressure.
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-card)", borderRadius: 14, padding: 24, marginBottom: 24 }}>
-      <div style={{ fontFamily: "var(--font-display)", fontSize: 17, fontWeight: 600, marginBottom: 3, color: "var(--text-primary)" }}>
-        Match Pressure
-      </div>
-      <div style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-muted)", marginBottom: 16 }}>
-        Current pressure level: {pressure.pressureLevel}
-      </div>
-      <div style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)", marginBottom: 16 }}>
-        Factors contributing to pressure:
-      </div>
-      <ul style={{ paddingLeft: 20, marginBottom: 16 }}>
-        {pressure.pressureFactors.map((factor, index) => (
-          <li key={index} style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)" }}>
-            {factor}
-          </li>
-        ))}
-      </ul>
+    <div className="intel-card">
+      <div className="intel-card-title">Match Pressure</div>
+      {!pressure ? (
+        <div className="intel-empty">Not enough match data to calculate pressure.</div>
+      ) : (
+        <div className="gauge-wrap">
+          <div className={`gauge-level-label gauge-${pressure.pressureLevel.toLowerCase()}`}>
+            Current pressure level: <b>{pressure.pressureLevel}</b>
+          </div>
+          <div className="gauge-svg-wrap">
+            <svg width="160" height="90" viewBox="0 0 160 90">
+              <path d="M 20 80 A 60 60 0 0 1 71.5 21.3" fill="none" stroke="var(--teal)" strokeWidth="10" strokeLinecap="round" />
+              <path d="M 71.5 21.3 A 60 60 0 0 1 88.5 21.3" fill="none" stroke="var(--amber)" strokeWidth="10" strokeLinecap="round" />
+              <path d="M 88.5 21.3 A 60 60 0 0 1 140 80" fill="none" stroke="var(--coral)" strokeWidth="10" strokeLinecap="round" />
+              {(() => {
+                const p = needlePoint(pressure.pressureLevel);
+                return (
+                  <>
+                    <line x1="80" y1="80" x2={p.x} y2={p.y} stroke="var(--text-primary)" strokeWidth="3" strokeLinecap="round" />
+                    <circle cx="80" cy="80" r="5" fill="var(--text-primary)" />
+                  </>
+                );
+              })()}
+            </svg>
+            <div className="gauge-value-label" style={{ color: LEVEL_COLOR[pressure.pressureLevel] }}>
+              {pressure.pressureLevel}
+            </div>
+          </div>
+          <div className="gauge-factors">
+            {pressure.pressureFactors.map((f, i) => (
+              <span key={i} className="gauge-factor-chip">{f}</span>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

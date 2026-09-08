@@ -7,6 +7,7 @@ const Sidebar = ({
   activeNavItem,
   onNavItemClick,
   onLogout,
+  onChangeTeamClick,
 }) => {
   return (
     <aside className="sidebar">
@@ -40,7 +41,7 @@ const Sidebar = ({
               <div className="match-count">{matchCount} tracked matches</div>
             </div>
           </div>
-          <button className="change-team-btn" onClick={() => {}}>
+          <button className="change-team-btn" onClick={onChangeTeamClick}>
             Change Team
           </button>
         </div>

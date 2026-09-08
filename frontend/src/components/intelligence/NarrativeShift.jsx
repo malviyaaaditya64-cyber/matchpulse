@@ -1,4 +1,5 @@
 import React from "react";
+import { LineChart, Line, ResponsiveContainer } from "recharts";
 
 const NarrativeShift = ({ season }) => {
   const calculateShift = () => {
@@ -6,6 +7,7 @@ const NarrativeShift = ({ season }) => {
 
     const recentMatches = season.slice(-3);
     const olderMatches = season.slice(0, -3);
+    if (olderMatches.length === 0) return null;
 
     const recentSentiment = recentMatches.reduce((sum, match) => sum + match.sentiment, 0) / recentMatches.length;
     const olderSentiment = olderMatches.reduce((sum, match) => sum + match.sentiment, 0) / olderMatches.length;
@@ -33,54 +35,50 @@ const NarrativeShift = ({ season }) => {
       shiftStatus = "STABLE";
     }
 
-    return {
-      sentimentChange,
-      confidenceChange,
-      blameChange,
-      shiftStatus,
-    };
+    return { sentimentChange, confidenceChange, blameChange, shiftStatus };
   };
 
   const shift = calculateShift();
-
-  if (!shift) {
-    return (
-      <div style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-card)", borderRadius: 14, padding: 24, marginBottom: 24 }}>
-        <div style={{ fontFamily: "var(--font-display)", fontSize: 17, fontWeight: 600, marginBottom: 3, color: "var(--text-primary)" }}>
-          Narrative Shift Detector
-        </div>
-        <div style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-muted)" }}>
-          Not enough match data to determine a narrative shift.
-        </div>
-      </div>
-    );
-  }
+  const sparkData = season?.map((m) => ({ v: m.blame })) || [];
 
   return (
-    <div style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-card)", borderRadius: 14, padding: 24, marginBottom: 24 }}>
-      <div style={{ fontFamily: "var(--font-display)", fontSize: 17, fontWeight: 600, marginBottom: 3, color: "var(--text-primary)" }}>
-        Narrative Shift Detector
-      </div>
-      <div style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-muted)", marginBottom: 16 }}>
-        Recent narrative is {shift.shiftStatus.toLowerCase()}.
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <span style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)", marginRight: 8 }}>
-            Sentiment: {shift.sentimentChange > 0 ? "+" : ""}{(shift.sentimentChange * 100).toFixed(0)}%
-          </span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <span style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)", marginRight: 8 }}>
-            Confidence: {shift.confidenceChange > 0 ? "+" : ""}{(shift.confidenceChange * 100).toFixed(0)}%
-          </span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <span style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)", marginRight: 8 }}>
-            Blame: {shift.blameChange > 0 ? "+" : ""}{(shift.blameChange * 100).toFixed(0)}%
-          </span>
-        </div>
-      </div>
+    <div className="intel-card">
+      <div className="intel-card-title">Narrative Shift Detector</div>
+      {!shift ? (
+        <div className="intel-empty">Not enough historical matches yet to determine a narrative shift.</div>
+      ) : (
+        <>
+          <div className="intel-card-subtitle">
+            Recent narrative is{" "}
+            <b className={`status-pill ${shift.shiftStatus.toLowerCase()}`}>{shift.shiftStatus}</b>
+          </div>
+
+          <div className="shift-metric-rows">
+            <div className="shift-metric-row">
+              <span>Sentiment</span>
+              <b>{shift.sentimentChange > 0 ? "+" : ""}{(shift.sentimentChange * 100).toFixed(0)}%</b>
+            </div>
+            <div className="shift-metric-row">
+              <span>Confidence</span>
+              <b>{shift.confidenceChange > 0 ? "+" : ""}{(shift.confidenceChange * 100).toFixed(0)}%</b>
+            </div>
+            <div className="shift-metric-row">
+              <span>Blame</span>
+              <b>{shift.blameChange > 0 ? "+" : ""}{(shift.blameChange * 100).toFixed(0)}%</b>
+            </div>
+          </div>
+
+          {sparkData.length > 1 && (
+            <div style={{ height: 50, marginTop: 8 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={sparkData}>
+                  <Line type="monotone" dataKey="v" stroke="var(--coral)" strokeWidth={2} dot={false} isAnimationActive={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 };

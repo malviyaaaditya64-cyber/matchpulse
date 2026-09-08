@@ -1,4 +1,5 @@
 import React from "react";
+import { ArrowUp, ArrowDown } from "lucide-react";
 
 const TeamIntelligence = ({ season }) => {
   const calculateIntelligence = () => {
@@ -22,58 +23,46 @@ const TeamIntelligence = ({ season }) => {
       intelligenceStatus = "Low";
     }
 
-    return {
-      form,
-      sentimentTrend,
-      confidenceTrend,
-      blameTrend,
-      intelligenceStatus,
-    };
+    return { form, sentimentTrend, confidenceTrend, blameTrend, intelligenceStatus };
   };
 
   const intelligence = calculateIntelligence();
 
-  if (!intelligence) {
+  const Row = ({ label, value, goodWhenUp }) => {
+    const up = value > 0;
+    const good = goodWhenUp ? up : !up;
     return (
-      <div style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-card)", borderRadius: 14, padding: 24, marginBottom: 24 }}>
-        <div style={{ fontFamily: "var(--font-display)", fontSize: 17, fontWeight: 600, marginBottom: 3, color: "var(--text-primary)" }}>
-          Team Intelligence
-        </div>
-        <div style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-muted)" }}>
-          Not enough match data to calculate team intelligence.
-        </div>
+      <div className="stat-row">
+        <span className="stat-row-label">{label}</span>
+        <span className={`stat-row-value ${good ? "up" : "down"}`}>
+          {up ? "+" : ""}{(value * 100).toFixed(0)}%
+          {up ? <ArrowUp size={12} /> : <ArrowDown size={12} />}
+        </span>
       </div>
     );
-  }
+  };
 
   return (
-    <div style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-card)", borderRadius: 14, padding: 24, marginBottom: 24 }}>
-      <div style={{ fontFamily: "var(--font-display)", fontSize: 17, fontWeight: 600, marginBottom: 3, color: "var(--text-primary)" }}>
-        Team Intelligence
-      </div>
-      <div style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-muted)", marginBottom: 16 }}>
-        Current form: {intelligence.form}
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <span style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)", marginRight: 8 }}>
-            Sentiment: {intelligence.sentimentTrend > 0 ? "+" : ""}{(intelligence.sentimentTrend * 100).toFixed(0)}%
-          </span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <span style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)", marginRight: 8 }}>
-            Confidence: {intelligence.confidenceTrend > 0 ? "+" : ""}{(intelligence.confidenceTrend * 100).toFixed(0)}%
-          </span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <span style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)", marginRight: 8 }}>
-            Blame: {intelligence.blameTrend > 0 ? "+" : ""}{(intelligence.blameTrend * 100).toFixed(0)}%
-          </span>
-        </div>
-      </div>
-      <div style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)", marginTop: 16 }}>
-        Intelligence Status: {intelligence.intelligenceStatus}
-      </div>
+    <div className="intel-card">
+      <div className="intel-card-title">Team Intelligence</div>
+      {!intelligence ? (
+        <div className="intel-empty">Not enough match data to calculate team intelligence.</div>
+      ) : (
+        <>
+          <div className="intel-card-subtitle">
+            Form: <b className={intelligence.form === "Good" ? "outlook-improving" : intelligence.form === "Poor" ? "outlook-declining" : "outlook-stable"}>{intelligence.form}</b>
+          </div>
+          <div className="stat-rows">
+            <Row label="Sentiment" value={intelligence.sentimentTrend} goodWhenUp={true} />
+            <Row label="Confidence" value={intelligence.confidenceTrend} goodWhenUp={true} />
+            <Row label="Blame" value={intelligence.blameTrend} goodWhenUp={false} />
+          </div>
+          <div className="intel-footer-row">
+            <span>Intelligence Status</span>
+            <span className={`status-pill ${intelligence.intelligenceStatus.toLowerCase()}`}>{intelligence.intelligenceStatus}</span>
+          </div>
+        </>
+      )}
     </div>
   );
 };

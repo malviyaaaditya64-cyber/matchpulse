@@ -28,46 +28,39 @@ const TeamPerformanceRadar = ({ season }) => {
 
   const metrics = calculateMetrics();
 
-  if (!metrics) {
-    return (
-      <div style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-card)", borderRadius: 14, padding: 24, marginBottom: 24 }}>
-        <div style={{ fontFamily: "var(--font-display)", fontSize: 17, fontWeight: 600, marginBottom: 3, color: "var(--text-primary)" }}>
-          Team Performance Radar
-        </div>
-        <div style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-muted)" }}>
-          Not enough match data to display performance metrics.
-        </div>
-      </div>
-    );
-  }
-
-  const data = [
-    { subject: "Sentiment", A: metrics.sentiment, fullMark: 100 },
-    { subject: "Confidence", A: metrics.confidence, fullMark: 100 },
-    { subject: "Blame", A: metrics.blame, fullMark: 100 },
-    { subject: "Wins", A: metrics.wins, fullMark: season.length },
-    { subject: "Draws", A: metrics.draws, fullMark: season.length },
-    { subject: "Losses", A: metrics.losses, fullMark: season.length },
-  ];
-
   return (
-    <div style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-card)", borderRadius: 14, padding: 24, marginBottom: 24 }}>
-      <div style={{ fontFamily: "var(--font-display)", fontSize: 17, fontWeight: 600, marginBottom: 3, color: "var(--text-primary)" }}>
-        Team Performance Radar
-      </div>
-      <div style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-muted)", marginBottom: 16 }}>
-        Current form: {metrics.form}
-      </div>
-      <div style={{ height: 400 }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
-            <PolarGrid />
-            <PolarAngleAxis dataKey="subject" />
-            <PolarRadiusAxis />
-            <Radar name="Performance" dataKey="A" stroke="var(--accent)" fill="var(--accent)" fillOpacity={0.6} />
-          </RadarChart>
-        </ResponsiveContainer>
-      </div>
+    <div className="intel-card">
+      <div className="intel-card-title">Team Performance Radar</div>
+      {!metrics ? (
+        <div className="intel-empty">Not enough match data to display performance metrics.</div>
+      ) : (
+        <>
+          <div className="intel-card-subtitle">
+            Form: <b className={metrics.form === "Good" ? "outlook-improving" : metrics.form === "Poor" ? "outlook-declining" : "outlook-stable"}>{metrics.form}</b>
+          </div>
+          <div style={{ height: 240, margin: "0 -4px" }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <RadarChart
+                cx="50%"
+                cy="50%"
+                outerRadius="55%"
+                data={[
+                  { subject: "Sentiment", A: metrics.sentiment, fullMark: 100 },
+                  { subject: "Confidence", A: metrics.confidence, fullMark: 100 },
+                  { subject: "Blame", A: metrics.blame, fullMark: 100 },
+                  { subject: "Wins", A: (metrics.wins / (metrics.wins + metrics.draws + metrics.losses || 1)) * 100, fullMark: 100 },
+                  { subject: "Losses", A: (metrics.losses / (metrics.wins + metrics.draws + metrics.losses || 1)) * 100, fullMark: 100 },
+                ]}
+              >
+                <PolarGrid stroke="var(--border)" />
+                <PolarAngleAxis dataKey="subject" tick={{ fill: "var(--text-muted)", fontSize: 9, fontFamily: "var(--font-body)" }} />
+                <PolarRadiusAxis tick={false} axisLine={false} domain={[0, 100]} />
+                <Radar name="Performance" dataKey="A" stroke="var(--coral)" fill="var(--coral)" fillOpacity={0.35} isAnimationActive={false} />
+              </RadarChart>
+            </ResponsiveContainer>
+          </div>
+        </>
+      )}
     </div>
   );
 };

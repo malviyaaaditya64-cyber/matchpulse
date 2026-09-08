@@ -1,4 +1,5 @@
 import React from "react";
+import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 const PerformanceForecast = ({ season }) => {
   const calculateForecast = () => {
@@ -6,6 +7,7 @@ const PerformanceForecast = ({ season }) => {
 
     const recentMatches = season.slice(-3);
     const olderMatches = season.slice(0, -3);
+    if (olderMatches.length === 0) return null;
 
     const recentSentiment = recentMatches.reduce((sum, match) => sum + match.sentiment, 0) / recentMatches.length;
     const olderSentiment = olderMatches.reduce((sum, match) => sum + match.sentiment, 0) / olderMatches.length;
@@ -34,7 +36,7 @@ const PerformanceForecast = ({ season }) => {
       confidenceLevel = "Medium";
     } else if (sentimentChange < -0.2 || confidenceChange < -0.2 || blameChange > 0.2) {
       outlook = "Declining";
-      explanation = "Negative trends in sentiment, confidence, or blame.";
+      explanation = "Negative trend in sentiment, confidence, or blame.";
       confidenceLevel = "High";
     } else {
       outlook = "Stable";
@@ -42,64 +44,61 @@ const PerformanceForecast = ({ season }) => {
       confidenceLevel = "Medium";
     }
 
-    return {
-      outlook,
-      explanation,
-      sentimentChange,
-      confidenceChange,
-      blameChange,
-      confidenceLevel,
-    };
+    return { outlook, explanation, sentimentChange, confidenceChange, blameChange, confidenceLevel };
   };
 
   const forecast = calculateForecast();
 
+  const MetricCell = ({ label, change }) => {
+    const up = change > 0;
+    const Icon = change === 0 ? Minus : up ? TrendingUp : TrendingDown;
+    return (
+      <div>
+        <div className="perf-trend-metric-label">{label}</div>
+        <div className={`perf-trend-metric-value ${up ? "up" : "down"}`}>
+          {up ? "+" : ""}
+          {(change * 100).toFixed(0)}%
+          <Icon size={14} />
+        </div>
+      </div>
+    );
+  };
+
   if (!forecast) {
     return (
-      <div style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-card)", borderRadius: 14, padding: 24, marginBottom: 24 }}>
-        <div style={{ fontFamily: "var(--font-display)", fontSize: 17, fontWeight: 600, marginBottom: 3, color: "var(--text-primary)" }}>
-          Performance Trend
+      <div className="perf-trend-card">
+        <div className="perf-trend-header">
+          <span className="perf-trend-title">Performance Trend</span>
         </div>
-        <div style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-muted)" }}>
-          Insufficient historical data to generate a forecast.
-        </div>
+        <div className="intel-empty">Not enough historical matches yet to compare recent trends.</div>
       </div>
     );
   }
 
   return (
-    <div style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-card)", borderRadius: 14, padding: 24, marginBottom: 24 }}>
-      <div style={{ fontFamily: "var(--font-display)", fontSize: 17, fontWeight: 600, marginBottom: 3, color: "var(--text-primary)" }}>
-        Performance Forecast
+    <div className="perf-trend-card">
+      <div className="perf-trend-header">
+        <span className="perf-trend-title">Performance Trend</span>
+        <button type="button" className="perf-trend-view-btn">View Details</button>
       </div>
-      <div style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-muted)", marginBottom: 16 }}>
-        Overall outlook: {forecast.outlook}
+
+      <div className="perf-trend-outlook">
+        Overall outlook:{" "}
+        <b className={`outlook-${forecast.outlook.toLowerCase()}`}>{forecast.outlook}</b>
       </div>
-      <div style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)", marginBottom: 16 }}>
-        {forecast.explanation}
+      <div className="perf-trend-explain">{forecast.explanation}</div>
+
+      <div className="perf-trend-metrics">
+        <MetricCell label="Sentiment" change={forecast.sentimentChange} />
+        <MetricCell label="Confidence" change={forecast.confidenceChange} />
+        <MetricCell label="Blame" change={forecast.blameChange} />
       </div>
-      <div style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-muted)", marginBottom: 8 }}>
-        Recent trend compared with earlier matches:
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <span style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)", marginRight: 8 }}>
-            Sentiment: {forecast.sentimentChange > 0 ? "+" : ""}{(forecast.sentimentChange * 100).toFixed(0)}%
-          </span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <span style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)", marginRight: 8 }}>
-            Confidence: {forecast.confidenceChange > 0 ? "+" : ""}{(forecast.confidenceChange * 100).toFixed(0)}%
-          </span>
-        </div>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <span style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)", marginRight: 8 }}>
-            Blame: {forecast.blameChange > 0 ? "+" : ""}{(forecast.blameChange * 100).toFixed(0)}%
-          </span>
-        </div>
-      </div>
-      <div style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)", marginTop: 16 }}>
-        Confidence level: {forecast.confidenceLevel}
+
+      <div className="perf-trend-footer">
+        <span className="perf-trend-compared">Compared to previous matches</span>
+        <span className={`confidence-pill ${forecast.confidenceLevel.toLowerCase()}`}>
+          {forecast.confidenceLevel}
+        </span>
       </div>
     </div>
   );

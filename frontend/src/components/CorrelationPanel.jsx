@@ -17,35 +17,16 @@ export default function CorrelationPanel({ analysis }) {
   const pValues = analysis.granger_causality_p_values || {};
 
   return (
-    <div
-      style={{
-        background: "var(--surface)",
-        border: "1px solid var(--border)",
-        boxShadow: "var(--shadow-card)",
-        borderRadius: 14,
-        padding: 24,
-      }}
-    >
-      <div style={{ fontFamily: "var(--font-display)", fontSize: 16, fontWeight: 600, marginBottom: 4 }}>
-        Does negativity predict a losing streak?
-      </div>
-      <div
-        style={{
-          fontFamily: "var(--font-body)",
-          fontSize: 13,
-          color: v.ok ? "var(--teal)" : "var(--text-secondary)",
-          marginBottom: 16,
-        }}
-      >
-        {v.text}
-      </div>
+    <div className="intel-card">
+      <div className="intel-card-title">Does negativity predict a losing streak?</div>
+      <div className={`corr-verdict ${v.ok ? "ok" : "pending"}`}>{v.text}</div>
 
-      <table style={{ width: "100%", borderCollapse: "collapse", fontFamily: "var(--font-mono)", fontSize: 12 }}>
+      <table className="corr-table">
         <thead>
-          <tr style={{ color: "var(--text-muted)", textAlign: "left" }}>
-            <th style={{ paddingBottom: 6 }}>Lag (matches ahead)</th>
-            <th style={{ paddingBottom: 6 }}>Correlation</th>
-            <th style={{ paddingBottom: 6 }}>Granger p-value</th>
+          <tr>
+            <th>Lag (matches ahead)</th>
+            <th>Correlation</th>
+            <th>Granger p-value</th>
           </tr>
         </thead>
         <tbody>
@@ -53,12 +34,12 @@ export default function CorrelationPanel({ analysis }) {
             const p = pValues[lag];
             const sig = typeof p === "number" && p < 0.05;
             return (
-              <tr key={lag} style={{ borderTop: "1px solid var(--border)" }}>
-                <td style={{ padding: "6px 0", color: "var(--text-secondary)" }}>+{lag}</td>
-                <td style={{ padding: "6px 0", color: "var(--text-primary)" }}>
+              <tr key={lag}>
+                <td style={{ color: "var(--text-secondary)" }}>+{lag}</td>
+                <td style={{ color: "var(--text-primary)" }}>
                   {lagCorr[lag] === null ? "—" : lagCorr[lag]}
                 </td>
-                <td style={{ padding: "6px 0", color: sig ? "var(--teal)" : "var(--text-secondary)" }}>
+                <td style={{ color: sig ? "var(--teal)" : "var(--text-secondary)" }}>
                   {typeof p === "number" ? p : "—"}
                   {sig && " *"}
                 </td>

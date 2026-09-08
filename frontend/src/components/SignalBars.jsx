@@ -31,14 +31,10 @@ function MiniTooltip({ active, payload, colorVar }) {
 
 export default function SignalBars({ season, dataKey, color, title, hint }) {
   return (
-    <div style={{ flex: 1 }}>
-      <div style={{ fontFamily: "var(--font-display)", fontSize: 14, fontWeight: 600, marginBottom: 2 }}>
-        {title}
-      </div>
-      <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "var(--text-muted)", marginBottom: 8 }}>
-        {hint}
-      </div>
-      <ResponsiveContainer width="100%" height={140}>
+    <div className="intel-card">
+      <div className="intel-card-title">{title}</div>
+      <div className="intel-card-subtitle">{hint}</div>
+      <ResponsiveContainer width="100%" height={180}>
         <BarChart data={season} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
           <ReferenceLine y={0} stroke="var(--border)" />
           <XAxis dataKey="date" hide />

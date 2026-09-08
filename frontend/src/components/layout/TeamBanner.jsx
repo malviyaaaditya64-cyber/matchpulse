@@ -1,7 +1,6 @@
 import React from "react";
 
 const TeamBanner = ({ team, sport, wins, draws, losses, matchCount }) => {
-  // Simple visual representation based on sport and team
   const getTeamVisual = () => {
     if (sport === "football") return "⚽";
     if (sport === "cricket") return "🏏";
@@ -10,19 +9,16 @@ const TeamBanner = ({ team, sport, wins, draws, losses, matchCount }) => {
 
   return (
     <div className="team-banner">
+      <div className="team-banner-watermark">{team?.toUpperCase()}</div>
       <div className="team-banner-content">
-        <div className="team-banner-visual">
-          {getTeamVisual()}
-        </div>
+        <div className="team-banner-flag">{getTeamVisual()}</div>
         <div className="team-banner-info">
           <h2 className="team-banner-title">{team}</h2>
           <div className="team-banner-meta">
             <span className="team-banner-record">
-              {wins}W · {draws}D · {losses}L
+              <span className="w">{wins}W</span> · <span className="d">{draws}D</span> · <span className="l">{losses}L</span>
             </span>
-            <span className="team-banner-tracked">
-              • {matchCount} tracked matches
-            </span>
+            <span>Across {matchCount} tracked matches</span>
           </div>
         </div>
       </div>

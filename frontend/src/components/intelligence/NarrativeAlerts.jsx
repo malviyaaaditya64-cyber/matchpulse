@@ -6,6 +6,7 @@ const NarrativeAlerts = ({ season }) => {
 
     const recentMatches = season.slice(-3);
     const olderMatches = season.slice(0, -3);
+    if (olderMatches.length === 0) return null;
 
     const recentSentiment = recentMatches.reduce((sum, match) => sum + match.sentiment, 0) / recentMatches.length;
     const olderSentiment = olderMatches.reduce((sum, match) => sum + match.sentiment, 0) / olderMatches.length;
@@ -37,38 +38,57 @@ const NarrativeAlerts = ({ season }) => {
       alertMessage = "No significant trends detected.";
     }
 
-    return {
-      alertStatus,
-      alertMessage,
-    };
+    return { alertStatus, alertMessage };
   };
 
   const alerts = calculateAlerts();
 
-  if (!alerts) {
-    return (
-      <div style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-card)", borderRadius: 14, padding: 24, marginBottom: 24 }}>
-        <div style={{ fontFamily: "var(--font-display)", fontSize: 17, fontWeight: 600, marginBottom: 3, color: "var(--text-primary)" }}>
-          Narrative Alerts
-        </div>
-        <div style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-muted)" }}>
-          Not enough match data to generate alerts.
-        </div>
-      </div>
-    );
-  }
+  const pillClass = (status) => {
+    if (status === "HIGH RISK") return "high";
+    if (status === "WATCH") return "watch";
+    if (status === "POSITIVE") return "positive";
+    return "none";
+  };
+
+  const RESULT_COLOR = { W: "var(--teal)", D: "var(--amber)", L: "var(--coral)" };
 
   return (
-    <div style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-card)", borderRadius: 14, padding: 24, marginBottom: 24 }}>
-      <div style={{ fontFamily: "var(--font-display)", fontSize: 17, fontWeight: 600, marginBottom: 3, color: "var(--text-primary)" }}>
-        Narrative Alerts
-      </div>
-      <div style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-muted)", marginBottom: 16 }}>
-        Current status: {alerts.alertStatus}
-      </div>
-      <div style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)" }}>
-        {alerts.alertMessage}
-      </div>
+    <div className="intel-card">
+      <div className="intel-card-title">Narrative Alerts</div>
+
+      {alerts ? (
+        <>
+          <div className="intel-card-subtitle">
+            Status: <span className={`status-pill ${pillClass(alerts.alertStatus)}`}>{alerts.alertStatus}</span>
+          </div>
+          <div style={{ fontSize: 12.5, color: "var(--text-primary)" }}>{alerts.alertMessage}</div>
+        </>
+      ) : (
+        <div className="intel-empty">Not enough historical matches yet to detect a trend.</div>
+      )}
+
+      {season && season.length > 0 && (
+        <>
+          <div style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 14 }}>
+            Press-conference tone across the season
+          </div>
+          <div className="narrative-alerts-strip">
+            {season.map((m) => (
+              <div
+                key={m.match_id}
+                title={`${m.opponent}: ${m.result}`}
+                className="narrative-alerts-bar"
+                style={{ background: RESULT_COLOR[m.result] || "var(--surface-sunken)" }}
+              />
+            ))}
+          </div>
+          <div className="narrative-alerts-legend">
+            <span><span className="legend-dot" style={{ background: "var(--teal)" }} /> Win</span>
+            <span><span className="legend-dot" style={{ background: "var(--amber)" }} /> Draw</span>
+            <span><span className="legend-dot" style={{ background: "var(--coral)" }} /> Loss</span>
+          </div>
+        </>
+      )}
     </div>
   );
 };

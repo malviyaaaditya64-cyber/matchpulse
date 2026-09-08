@@ -1,4 +1,5 @@
 import React from "react";
+import { TrendingUp, TrendingDown, Zap, Flame, RefreshCw } from "lucide-react";
 
 const MatchInsights = ({ season }) => {
   const calculateInsights = () => {
@@ -6,55 +7,50 @@ const MatchInsights = ({ season }) => {
 
     const insights = [];
 
-    // Find strongest positive sentiment match
     const strongestPositiveMatch = season.reduce((max, match) => (match.sentiment > max.sentiment ? match : max), season[0]);
     if (strongestPositiveMatch) {
       insights.push({
         type: "Strongest Positive Sentiment",
-        value: strongestPositiveMatch.sentiment,
+        icon: "up",
         date: strongestPositiveMatch.date,
         opponent: strongestPositiveMatch.opponent,
-        explanation: `Highest sentiment score of ${strongestPositiveMatch.sentiment.toFixed(2)}`,          
+        explanation: `Highest sentiment score of ${strongestPositiveMatch.sentiment.toFixed(2)}`,
       });
     }
 
-    // Find weakest sentiment match
     const weakestSentimentMatch = season.reduce((min, match) => (match.sentiment < min.sentiment ? match : min), season[0]);
     if (weakestSentimentMatch) {
       insights.push({
         type: "Weakest Sentiment",
-        value: weakestSentimentMatch.sentiment,
+        icon: "down",
         date: weakestSentimentMatch.date,
         opponent: weakestSentimentMatch.opponent,
-        explanation: `Lowest sentiment score of ${weakestSentimentMatch.sentiment.toFixed(2)}`,          
+        explanation: `Lowest sentiment score of ${weakestSentimentMatch.sentiment.toFixed(2)}`,
       });
     }
 
-    // Find highest confidence match
     const highestConfidenceMatch = season.reduce((max, match) => (match.confidence > max.confidence ? match : max), season[0]);
     if (highestConfidenceMatch) {
       insights.push({
         type: "Highest Confidence",
-        value: highestConfidenceMatch.confidence,
+        icon: "zap",
         date: highestConfidenceMatch.date,
         opponent: highestConfidenceMatch.opponent,
-        explanation: `Highest confidence score of ${highestConfidenceMatch.confidence.toFixed(2)}`,          
+        explanation: `Highest confidence score of ${highestConfidenceMatch.confidence.toFixed(2)}`,
       });
     }
 
-    // Find highest blame match
     const highestBlameMatch = season.reduce((max, match) => (match.blame > max.blame ? match : max), season[0]);
     if (highestBlameMatch) {
       insights.push({
         type: "Highest Blame",
-        value: highestBlameMatch.blame,
+        icon: "flame",
         date: highestBlameMatch.date,
         opponent: highestBlameMatch.opponent,
-        explanation: `Highest blame score of ${highestBlameMatch.blame.toFixed(2)}`,          
+        explanation: `Highest blame score of ${highestBlameMatch.blame.toFixed(2)}`,
       });
     }
 
-    // Find biggest sentiment change
     if (season.length > 1) {
       let maxChange = 0;
       let changeMatch = null;
@@ -68,10 +64,10 @@ const MatchInsights = ({ season }) => {
       if (changeMatch) {
         insights.push({
           type: "Biggest Sentiment Change",
-          value: maxChange,
+          icon: "swing",
           date: changeMatch.date,
           opponent: changeMatch.opponent,
-          explanation: `Biggest sentiment change of ${maxChange.toFixed(2)}`,          
+          explanation: `Biggest sentiment change of ${maxChange.toFixed(2)}`,
         });
       }
     }
@@ -81,42 +77,36 @@ const MatchInsights = ({ season }) => {
 
   const insights = calculateInsights();
 
-  if (!insights || insights.length === 0) {
-    return (
-      <div style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-card)", borderRadius: 14, padding: 24, marginBottom: 24 }}>
-        <div style={{ fontFamily: "var(--font-display)", fontSize: 17, fontWeight: 600, marginBottom: 3, color: "var(--text-primary)" }}>
-          Match Insights
-        </div>
-        <div style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-muted)" }}>
-          Not enough match data to generate insights.
-        </div>
-      </div>
-    );
-  }
+  const ICONS = { up: TrendingUp, down: TrendingDown, zap: Zap, flame: Flame, swing: RefreshCw };
+  const COLORS = { up: "up", down: "down", zap: "info", flame: "down", swing: "info" };
 
   return (
-    <div style={{ background: "var(--surface)", border: "1px solid var(--border)", boxShadow: "var(--shadow-card)", borderRadius: 14, padding: 24, marginBottom: 24 }}>
-      <div style={{ fontFamily: "var(--font-display)", fontSize: 17, fontWeight: 600, marginBottom: 3, color: "var(--text-primary)" }}>
-        Match Insights
-      </div>
-      <div style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-muted)", marginBottom: 16 }}>
-        Key match-level signals:
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-        {insights.map((insight, index) => (
-          <div key={index} style={{ background: "var(--surface-sunken)", borderRadius: 10, padding: 16 }}>
-            <div style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-primary)", marginBottom: 8 }}>
-              {insight.type}
-            </div>
-            <div style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-secondary)", marginBottom: 8 }}>
-              Date: {insight.date} vs {insight.opponent || "Unknown Opponent"}
-            </div>
-            <div style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "var(--text-secondary)" }}>
-              {insight.explanation}
-            </div>
-          </div>
-        ))}
-      </div>
+    <div className="intel-card">
+      <div className="intel-card-title">Key Match Insights</div>
+      {(!insights || insights.length === 0) ? (
+        <div className="intel-empty">Not enough match data to generate insights.</div>
+      ) : (
+        <div className="icon-list">
+          {insights.map((insight, index) => {
+            const Icon = ICONS[insight.icon] || TrendingUp;
+            const color = COLORS[insight.icon] || "info";
+            return (
+              <div key={index} className="icon-list-item">
+                <div className={`icon-bullet ${color}`}>
+                  <Icon size={13} />
+                </div>
+                <div className="icon-list-text">
+                  <div className={`icon-list-title ${color}`}>{insight.type}</div>
+                  <div className="icon-list-meta">
+                    {insight.date} vs {insight.opponent || "Unknown Opponent"}<br />
+                    {insight.explanation}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };
